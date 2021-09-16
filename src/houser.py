@@ -10,6 +10,9 @@ class Houser(object):
         self.height = height
         pass
 
+    def divide(self, percentage=50.0):
+        pass
+
 
 if __name__ == "__main__":
     pass
