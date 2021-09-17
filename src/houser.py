@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 """
-houser.py - 
+houser.py - strange little geometric experiment
 """
 
 
 class Houser(object):
+    """Houser
+    """
     def __init__(self, width=None, height=None):
+        """
+        """
         self.width = width
         self.height = height
         pass
 
     def divide(self, percentage=50.0):
+        """ divide
+        """
         pass
 
 
