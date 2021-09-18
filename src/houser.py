@@ -1,6 +1,17 @@
 #!/usr/bin/env python
 """
 houser.py - strange little geometric experiment
+
++---------------------+
+|                     |
+|                     |
+|                     |
+|                     |
+|                     |
++---------------------+
+
+From a generic box, create sub-boxes.
+
 """
 
 
