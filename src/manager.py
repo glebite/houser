@@ -2,6 +2,7 @@
 """
 import configparser
 import argparse
+import logging
 
 
 class Manager:
@@ -9,10 +10,11 @@ class Manager:
     """
     def __init__(self, config_file):
         self.config_file = config_file
+        self.configuration = None
 
     def configure(self):
-        config = configparser.ConfigParser()
-        print(f'parsing {config.sections()=}')
+        self.configuration = configparser.ConfigParser()
+        self.configuration.read(self.config_file)
 
 
 def main(configuration_file):
