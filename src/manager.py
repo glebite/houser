@@ -3,6 +3,7 @@
 import configparser
 import argparse
 import logging
+import sys
 
 
 class Manager:
@@ -14,8 +15,11 @@ class Manager:
 
     def configure(self):
         self.configuration = configparser.ConfigParser()
-        self.configuration.read(self.config_file)
-
+        try:
+            self.configuration.read(self.config_file)
+        except (configparser.Error, IOError, OSError) as err:
+            print(err)
+            sys.exit(1)
 
 def main(configuration_file):
     """
