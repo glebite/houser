@@ -59,21 +59,27 @@ class EmailHandler:
             except (configparser.Error, IOError, OSError) as err:
                 logger.error(f'Failing due to: {err=}')
                 sys.exit(1)
+        return True
                 
     def _credentials(self):
         """
         """
         logger.debug('Setting up credentials.')
         if os.path.exists(self.configuration['Server']['token_file']):
+            logger.debug(f"Retrieving credentials from {self.configuration['Server']['token_file']=}")
             self.creds = Credentials.from_authorized_user_file(self.configuration['Server']['token_file'])
         if not self.creds or not self.creds.valid:
+            logger.debug(f"Credentials are not existing/valid")
             if self.creds and self.creds.expired and self.creds.refresh_token:
+                logger.debug(f"Credential refresh request called.")
                 self.creds.refresh(Request())
             else:
+                logger.debug(f"Setting up flow.")
                 flow = InstalledAppFlow.from_client_secrets_file(self.configuration['Server']['credentials_file'], SCOPES)
                 self.creds = flow.run_local_server(port=0)
             with open(self.configuration['Server']['token_file'], 'w') as token:
                 token.write(self.creds.to_json())
+        return self.creds
 
     def configure(self):
         """
@@ -81,8 +87,8 @@ class EmailHandler:
         logger.info("Configuring it all together.")
         self._process_detail_file()
         self._credentials()
+        logger.debug('Created credentials - building service.')
         self.service = build('gmail', 'v1', credentials = self.creds)
-
 
     def read_email(self):
         """ IOU: refactoring...
@@ -113,11 +119,11 @@ class EmailHandler:
         """
         pass
 
-    def SendMessageInternal(service, user_id, message):
+    def SendMessageInternal(self, service, user_id, message):
         """
         """
         try:
-            message = (service.users().messages().send(userId=user_id, body=message).execute())
+            message = (self.service.users().messages().send(userId=user_id, body=message).execute())
             print('Message Id: %s' % message['id'])
             return message
         except errors.HttpError as error:
@@ -125,7 +131,7 @@ class EmailHandler:
             return "Error"
         return "OK"
 
-    def CreateMessageHtml(sender, to, subject, msgHtml, msgPlain):
+    def CreateMessageHtml(self, sender, to, subject, msgHtml, msgPlain):
         """
         """
         msg = MIMEMultipart('alternative')
@@ -137,7 +143,7 @@ class EmailHandler:
         return {'raw': base64.urlsafe_b64encode(msg.as_bytes()).decode()}
 
     def createMessageWithAttachment(
-        sender, to, subject, msgHtml, msgPlain, attachmentFile):
+            self, sender, to, subject, msgHtml, msgPlain, attachmentFile):
         """Create a message for an email.
 
         Args:
@@ -194,24 +200,26 @@ class EmailHandler:
 
         return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
-
+    
     def SendMessage(self, sender, to, subject, msgHtml, msgPlain, attachmentFile=None):
         """
         """
-        http = self.creds.authorize(httplib2.Http())
-        service = discovery.build('gmail', 'v1', http=http)
+        logger.info("About to send message.")
+        logger.info("Build http...")
         if attachmentFile:
+            logger.debug('Attachments')
             message1 = self.createMessageWithAttachment(sender, to, subject, msgHtml, msgPlain, attachmentFile)
-        else: 
+        else:
+            logger.debug('No attachments!')
             message1 = self.CreateMessageHtml(sender, to, subject, msgHtml, msgPlain)
-            result = self.SendMessageInternal(service, "me", message1)
+            result = self.SendMessageInternal(self.service, "me", message1)
         return result
     
 
 def main():
     x = EmailHandler('../templates/test.ini')
     x.configure()
-    x.read_email()
+    x.SendMessage('tsunami.workunit23@gmail.com', 'glebite@gmail.com', 'hi', 'hi', 'hi')
 
 
 if __name__ == "__main__":
