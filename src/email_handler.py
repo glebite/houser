@@ -91,8 +91,6 @@ class EmailHandler:
         self.service = build('gmail', 'v1', credentials = self.creds)
 
     def read_email(self):
-        """ IOU: refactoring...
-        """
         logger.info('Getting list of emails in UNREAD state')
         try:
             # Call the Gmail API
@@ -104,22 +102,15 @@ class EmailHandler:
                 print(dir(msg))
                 for k in msg.items():
                     print(k)
-                self.service.users().messages().modify(userId='me', id=message['id'], body={'removeLabelIds': ['UNREAD']}).execute()
+                self.service.users().messages().modify(userId='me',
+                                                       id=message['id'],
+                                                       body={'removeLabelIds': ['UNREAD']}).execute()
 
         except HttpError as error:
             # TODO(developer) - Handle errors from gmail API.
             print(f'An error occurred: {error}')        
 
-    def send_mail(self,
-                  to_address,
-                  subject,
-                  body,
-                  attachments):
-        """send_mail
-        """
-        pass
-
-    def SendMessageInternal(self, service, user_id, message):
+    def send_message_internal(self, service, user_id, message):
         """
         """
         try:
@@ -131,28 +122,29 @@ class EmailHandler:
             return "Error"
         return "OK"
 
-    def CreateMessageHtml(self, sender, to, subject, msgHtml, msgPlain):
+    def create_message_html(self, sender, to, subject, msg_html, msg_plain):
         """
         """
+        logger.info(f'Creating {sender=} {to=} {subject=}')
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
         msg['From'] = sender
         msg['To'] = to
-        msg.attach(MIMEText(msgPlain, 'plain'))
-        msg.attach(MIMEText(msgHtml, 'html'))
+        msg.attach(MIMEText(msg_plain, 'plain'))
+        msg.attach(MIMEText(msg_html, 'html'))
         return {'raw': base64.urlsafe_b64encode(msg.as_bytes()).decode()}
 
-    def createMessageWithAttachment(
-            self, sender, to, subject, msgHtml, msgPlain, attachmentFile):
+    def create_message_with_attachment(
+            self, sender, to, subject, msg_html, msg_plain, attachment_file):
         """Create a message for an email.
 
         Args:
           sender: Email address of the sender.
           to: Email address of the receiver.
           subject: The subject of the email message.
-          msgHtml: Html message to be sent
-          msgPlain: Alternative plain text message for older email clients          
-          attachmentFile: The path to the file to be attached.
+          msg_html: Html message to be sent
+          msg_plain: Alternative plain text message for older email clients          
+          attachment_file: The path to the file to be attached.
 
         Returns:
           An object containing a base64url encoded email object.
@@ -162,64 +154,65 @@ class EmailHandler:
         message['from'] = sender
         message['subject'] = subject
 
-        messageA = MIMEMultipart('alternative')
-        messageR = MIMEMultipart('related')
+        message_a = MIMEMultipart('alternative')
+        message_r = MIMEMultipart('related')
 
-        messageR.attach(MIMEText(msgHtml, 'html'))
-        messageA.attach(MIMEText(msgPlain, 'plain'))
-        messageA.attach(messageR)
+        message_r.attach(MIMEText(msg_html, 'html'))
+        message_a.attach(MIMEText(msg_plain, 'plain'))
+        message_a.attach(message_r)
 
-        message.attach(messageA)
+        message.attach(message_a)
 
-        print("create_message_with_attachment: file: %s" % attachmentFile)
-        content_type, encoding = mimetypes.guess_type(attachmentFile)
+        print("create_message_with_attachment: file: %s" % attachment_file)
+        content_type, encoding = mimetypes.guess_type(attachment_file)
 
         if content_type is None or encoding is not None:
             content_type = 'application/octet-stream'
         main_type, sub_type = content_type.split('/', 1)
         if main_type == 'text':
-            fp = open(attachmentFile, 'rb')
+            fp = open(attachment_file, 'rb')
             msg = MIMEText(fp.read(), _subtype=sub_type)
             fp.close()
         elif main_type == 'image':
-            fp = open(attachmentFile, 'rb')
+            fp = open(attachment_file, 'rb')
             msg = MIMEImage(fp.read(), _subtype=sub_type)
             fp.close()
         elif main_type == 'audio':
-            fp = open(attachmentFile, 'rb')
+            fp = open(attachment_file, 'rb')
             msg = MIMEAudio(fp.read(), _subtype=sub_type)
             fp.close()
         else:
-            fp = open(attachmentFile, 'rb')
+            fp = open(attachment_file, 'rb')
             msg = MIMEBase(main_type, sub_type)
             msg.set_payload(fp.read())
             fp.close()
-        filename = os.path.basename(attachmentFile)
+        filename = os.path.basename(attachment_file)
         msg.add_header('Content-Disposition', 'attachment', filename=filename)
         message.attach(msg)
 
         return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
 
     
-    def SendMessage(self, sender, to, subject, msgHtml, msgPlain, attachmentFile=None):
+    def send_message(self, sender, to, subject, msg_html, msg_plain, attachment_file=None):
         """
         """
         logger.info("About to send message.")
         logger.info("Build http...")
-        if attachmentFile:
+        if attachment_file:
             logger.debug('Attachments')
-            message1 = self.createMessageWithAttachment(sender, to, subject, msgHtml, msgPlain, attachmentFile)
+            message1 = self.create_message_with_attachment(sender, to, subject, msg_html, msg_plain, attachment_file)
         else:
             logger.debug('No attachments!')
-            message1 = self.CreateMessageHtml(sender, to, subject, msgHtml, msgPlain)
-            result = self.SendMessageInternal(self.service, "me", message1)
+            message1 = self.create_message_html(sender, to, subject, msg_html, msg_plain)
+            result = self.send_message_internal(self.service, "me", message1)
         return result
     
 
 def main():
     x = EmailHandler('../templates/test.ini')
     x.configure()
-    x.SendMessage('tsunami.workunit23@gmail.com', 'glebite@gmail.com', 'hi', 'hi', 'hi')
+    x.send_message('tsunami.workunit23@gmail.com', 'glebite@gmail.com', 'hi', 'hi', 'hi')
+    x.read_email()
 
 
 if __name__ == "__main__":
