@@ -211,7 +211,6 @@ class EmailHandler:
 def main():
     x = EmailHandler('../templates/test.ini')
     x.configure()
-    x.send_message('tsunami.workunit23@gmail.com', 'glebite@gmail.com', 'hi', 'hi', 'hi')
     x.read_email()
 
 

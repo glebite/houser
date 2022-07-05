@@ -5,6 +5,7 @@ import argparse
 import logging
 import sys
 from base_logger import logger
+from email_handler import EmailHandler
 
 
 class Manager:
@@ -14,6 +15,7 @@ class Manager:
         logger.info(f'Initializing... {config_file=}')
         self.config_file = config_file
         self.configuration = None
+        self.email = EmailHandler(config_file)
 
     def configure(self):
         self.configuration = configparser.ConfigParser()
@@ -27,11 +29,12 @@ class Manager:
 def main(configuration_file):
     """
     """
+    logger.info(f'Firing up main with {configuration_file}')
     x = Manager(configuration_file)
+    x.email.configure()
 
 
 if __name__=="__main__":
-    logger.info("This is an info message")    
     parser = argparse.ArgumentParser(description = 'House Manager Reporter System.')
     parser.add_argument('--config', help='path to the configuration file')
     args = parser.parse_args()
