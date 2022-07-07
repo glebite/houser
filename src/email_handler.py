@@ -101,7 +101,7 @@ class EmailHandler:
                 msg = self.service.users().messages().get(userId='me', id=message['id']).execute()
                 print(dir(msg))
                 for k in msg.items():
-                    print(k)
+                    print(k[0])
                 self.service.users().messages().modify(userId='me',
                                                        id=message['id'],
                                                        body={'removeLabelIds': ['UNREAD']}).execute()

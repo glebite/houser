@@ -32,6 +32,7 @@ def main(configuration_file):
     logger.info(f'Firing up main with {configuration_file}')
     x = Manager(configuration_file)
     x.email.configure()
+    x.email.read_email()
 
 
 if __name__=="__main__":
