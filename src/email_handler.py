@@ -29,7 +29,7 @@ from base_logger import logger
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly',
-          'https://www.googleapis.com/auth/gmail.modify']
+         'https://www.googleapis.com/auth/gmail.modify']
 
 
 class EmailHandler:
@@ -99,9 +99,11 @@ class EmailHandler:
 
             for message in messages:
                 msg = self.service.users().messages().get(userId='me', id=message['id']).execute()
-                print(dir(msg))
-                for k in msg.items():
-                    print(k[0])
+                for thing in msg['payload']['parts']:
+                    print(base64.b64decode(thing['body']['data']))
+                
+                # for k in msg.items():
+                #     print(k[0])
                 self.service.users().messages().modify(userId='me',
                                                        id=message['id'],
                                                        body={'removeLabelIds': ['UNREAD']}).execute()
