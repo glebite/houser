@@ -35,7 +35,7 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.readonly',
 
 
 class EmailHandler:
-    """EmailHandler
+    """EmailHandler -
     """
     def __init__(self, detail_file):
         """__init__
@@ -47,7 +47,7 @@ class EmailHandler:
         self.detail_file = detail_file
 
     def _process_detail_file(self):
-        """_process_detail_file
+        """_process_detail_file -
         """
         logger.debug(f'Processing {self.detail_file=}')
         if not os.path.exists(self.detail_file):
@@ -64,7 +64,7 @@ class EmailHandler:
         return True
                 
     def _credentials(self):
-        """
+        """credentials -
         """
         logger.debug('Setting up credentials.')
         if os.path.exists(self.configuration['Server']['token_file']):
@@ -84,7 +84,7 @@ class EmailHandler:
         return self.creds
 
     def configure(self):
-        """
+        """configure -
         """
         logger.info("Configuring it all together.")
         self._process_detail_file()
@@ -93,6 +93,8 @@ class EmailHandler:
         self.service = build('gmail', 'v1', credentials = self.creds)
 
     def read_email(self):
+        """read_email -
+        """
         logger.info('Getting list of emails in UNREAD state')
         try:
             # Call the Gmail API
@@ -125,7 +127,7 @@ class EmailHandler:
         return "OK"
 
     def create_message_html(self, sender, to, subject, msg_html, msg_plain):
-        """
+        """create_message_html
         """
         logger.info(f'Creating {sender=} {to=} {subject=}')
         msg = MIMEMultipart('alternative')
