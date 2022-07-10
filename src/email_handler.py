@@ -95,6 +95,7 @@ class EmailHandler:
     def read_email(self):
         """read_email -
         """
+        emails = list()
         logger.info('Getting list of emails in UNREAD state')
         try:
             # Call the Gmail API
