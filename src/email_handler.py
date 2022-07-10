@@ -100,10 +100,8 @@ class EmailHandler:
             for message in messages:
                 msg = self.service.users().messages().get(userId='me', id=message['id']).execute()
                 for thing in msg['payload']['parts']:
-                    print(base64.b64decode(thing['body']['data']))
+                    print(base64.urlsafe_b64decode(thing['body']['data']))
                 
-                # for k in msg.items():
-                #     print(k[0])
                 self.service.users().messages().modify(userId='me',
                                                        id=message['id'],
                                                        body={'removeLabelIds': ['UNREAD']}).execute()
