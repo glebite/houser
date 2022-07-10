@@ -2,6 +2,8 @@
 
 A big chunk has been lifted from:
 https://stackoverflow.com/questions/37201250/sending-email-via-gmail-python
+
+More good stuff to follow...
 """
 from __future__ import print_function
 
