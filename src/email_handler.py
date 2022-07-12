@@ -104,8 +104,12 @@ class EmailHandler:
 
             for message in messages:
                 msg = self.service.users().messages().get(userId='me', id=message['id']).execute()
+                from = msg['payload']['headers'][6]['value']
+                
                 for thing in msg['payload']['parts']:
-                    print(base64.urlsafe_b64decode(thing['body']['data']))
+                    bits = dict()
+                    import pdb; pdb.set_trace()
+                    # print(base64.urlsafe_b64decode(thing['body']['data']))
                 
                 self.service.users().messages().modify(userId='me',
                                                        id=message['id'],
