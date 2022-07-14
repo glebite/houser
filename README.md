@@ -4,3 +4,5 @@ there.
 
 It should work well enough.
 
+Camera stuff coming next.
+
